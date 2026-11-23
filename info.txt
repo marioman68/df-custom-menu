@@ -13,3 +13,5 @@
 [STEAM_TAG:tool]
 [STEAM_TAG:interface]
 [STEAM_CHANGELOG:v1.0 - First release. Edit the DFHack logo menu - add, remove, reorder, rename and group commands, assign hotkeys, pin favourites to a toolbar under the top information bar, and add commands from the DFHack launcher with Ctrl-K.]
+
+[STEAM_FILE_ID:3844578999]

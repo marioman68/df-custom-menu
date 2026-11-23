@@ -1115,30 +1115,63 @@ EmbarkToolbar.ATTRS{
     version=1,
 }
 
--- small button between the DFHack logo and the top bar: show / hide the toolbar
+-- small button between the DFHack logo and the top bar: show / hide the toolbar.
+-- Same size as the logo next to it; the whole box is the button.
 ToolbarToggle = defclass(nil, overlay.OverlayWidget)
 ToolbarToggle.ATTRS{
     desc='Button next to the DFHack logo that shows or hides the Custom DFHack Menu toolbar.',
     default_pos={x=10, y=1},
     default_enabled=true,
     viewscreens={'dwarfmode/Default', 'dungeonmode/Default'},
-    frame={w=5, h=3},
+    frame={w=4, h=3},
     frame_style=gui.FRAME_INTERIOR_MEDIUM,
-    frame_background=gui.CLEAR_PEN,
-    version=1,
+    frame_background=gui.CLEAR_PEN, -- (the arrow image fills the inside with the border's own grey)
+    version=2,
 }
+
+local ARROW_DOWN, ARROW_UP = string.char(31), string.char(30)
+
+-- The arrow is drawn from a small image two tiles wide (custom-menu-arrows-N.png,
+-- next to this script) so it sits exactly in the middle of the box; a single
+-- character can only go in one tile or the other. Rows: green down, grey up,
+-- then the same two highlighted for when the mouse is over the button.
+-- DFHack caches images by file name for the whole session, so bump N whenever
+-- the image changes.
+local ARROWS_IMAGE = 'custom-menu-arrows-1.png'
+local function arrow_tiles()
+    if STATE.arrow_handles ~= nil and STATE.arrow_image == ARROWS_IMAGE then return STATE.arrow_handles end
+    STATE.arrow_handles, STATE.arrow_image = false, ARROWS_IMAGE
+    local script = dfhack.findScript('custom-menu')
+    local png = script and script:gsub('[^/\\]+$', '') .. ARROWS_IMAGE
+    if png and dfhack.filesystem.isfile(png) then
+        local ok, handles = pcall(dfhack.textures.loadTileset, png, 8, 12, true)
+        if ok and handles and #handles >= 8 then STATE.arrow_handles = handles end
+    end
+    return STATE.arrow_handles
+end
+
+-- pen for the left (1) or right (2) half of the arrow
+local function arrow_pen(shown, hover, half)
+    local handles = arrow_tiles()
+    local row = (shown and 0 or 1) + (hover and 2 or 0)
+    local fg = hover and COLOR_BLACK or (shown and COLOR_LIGHTGREEN or COLOR_GREY)
+    local bg = hover and COLOR_LIGHTCYAN or nil
+    local ch = half == 1 and (shown and ARROW_DOWN or ARROW_UP) or ' ' -- text-mode fallback
+    local tile = handles and dfhack.textures.getTexposByHandle(handles[row * 2 + half]) or nil
+    return dfhack.pen.parse{ch=string.byte(ch), fg=fg, bg=bg, tile=tile}
+end
 
 function ToolbarToggle:init()
     self.built_version = -1
     self.has_entries, self.shown = false, true
     self:addviews{
         widgets.Label{
-            frame={t=0, l=0, w=3},
-            -- down arrow = toolbar is hidden (click to show); up arrow = shown (click to hide)
-            text={{text=function() return self.shown and (' ' .. string.char(30) .. ' ') or (' ' .. string.char(31) .. ' ') end,
-                pen=function() return self.shown and COLOR_LIGHTGREEN or COLOR_GREY end}},
-            text_hpen={fg=COLOR_BLACK, bg=COLOR_LIGHTCYAN},
-            on_click=function() set_setting('toolbar_shown', not self.shown) end,
+            frame={t=0, l=0, w=2},
+            -- green down arrow = shortcuts showing; grey up arrow = hidden
+            text={
+                {tile=function() return arrow_pen(self.shown, self:getMouseFramePos() ~= nil, 1) end},
+                {tile=function() return arrow_pen(self.shown, self:getMouseFramePos() ~= nil, 2) end},
+            },
         },
     }
     -- only there when something is on the toolbar
@@ -1151,6 +1184,15 @@ function ToolbarToggle:init()
         end
         return self.has_entries
     end
+end
+
+-- a click anywhere in the box (border included) toggles the toolbar
+function ToolbarToggle:onInput(keys)
+    if keys._MOUSE_L and self:getMouseFramePos() then
+        set_setting('toolbar_shown', not self.shown)
+        return true
+    end
+    return ToolbarToggle.super.onInput(self, keys)
 end
 
 ---------------------------------------------------------------------------
