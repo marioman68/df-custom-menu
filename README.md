@@ -51,9 +51,9 @@ Commands marked for the toolbar get a button in a strip just under the top infor
 to fit, wraps onto more rows when there are lots of buttons, and hides when there are none. Buttons for commands
 that are switched on are green. Click a button to run its command.
 
-The small arrow button next to the DFHack logo shows or hides the toolbar. There are toolbars for fort mode,
-adventure mode, legends and the embark screen – move any of them with `gui/overlay`
-(`custom-menu.toolbar`, `custom-menu.advtoolbar`, `custom-menu.legendstoolbar`, `custom-menu.embarktoolbar`).
+The small arrow button next to the DFHack logo shows or hides the toolbar. The toolbar appears while you're playing
+a fort or an adventure (not on the world map, embark screen or legends) – move it with `gui/overlay`
+(`custom-menu.toolbar` in fort mode, `custom-menu.advtoolbar` in adventure mode).
 
 ## From the DFHack launcher
 

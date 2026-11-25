@@ -994,6 +994,14 @@ local function toolbar_entries()
     return out
 end
 
+-- only while a fort or adventure map is being played (not on the world map,
+-- embark screen, legends, title screen and so on)
+function in_play()
+    if not dfhack.isMapLoaded() then return false end
+    local mode = current_mode()
+    return mode == 'fort' or mode == 'adventure'
+end
+
 local SCROLL_LEFT, SCROLL_RIGHT = string.char(174), string.char(175) -- << >>
 
 ToolbarOverlay = defclass(nil, overlay.OverlayWidget)
@@ -1015,7 +1023,7 @@ function ToolbarOverlay:init()
             self:rebuild(key)
             self.needs_layout = true
         end
-        return self.shown and #self.entries > 0
+        return self.shown and #self.entries > 0 and in_play()
     end
 end
 
@@ -1099,22 +1107,6 @@ AdventureToolbar.ATTRS{
     version=1,
 }
 
-LegendsToolbar = defclass(nil, ToolbarOverlay)
-LegendsToolbar.ATTRS{
-    desc='Toolbar of your chosen commands in legends mode.',
-    default_pos={x=30, y=1},
-    viewscreens={'legends'},
-    version=1,
-}
-
-EmbarkToolbar = defclass(nil, ToolbarOverlay)
-EmbarkToolbar.ATTRS{
-    desc='Toolbar of your chosen commands on the embark screen.',
-    default_pos={x=8, y=-3},
-    viewscreens={'choose_start_site'},
-    version=1,
-}
-
 -- small button between the DFHack logo and the top bar: show / hide the toolbar.
 -- Same size as the logo next to it; the whole box is the button.
 ToolbarToggle = defclass(nil, overlay.OverlayWidget)
@@ -1182,7 +1174,7 @@ function ToolbarToggle:init()
             self.has_entries = false
             for _, e in ipairs(get_entries() or {}) do if e.toolbar then self.has_entries = true break end end
         end
-        return self.has_entries
+        return self.has_entries and in_play()
     end
 end
 
@@ -1236,8 +1228,6 @@ end
 OVERLAY_WIDGETS = {
     toolbar=FortToolbar,
     advtoolbar=AdventureToolbar,
-    legendstoolbar=LegendsToolbar,
-    embarktoolbar=EmbarkToolbar,
     toolbartoggle=ToolbarToggle,
     modlisthider=ModListHider,
 }

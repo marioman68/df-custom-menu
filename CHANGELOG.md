@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1 – Toolbar only where it belongs
+
+- The toolbar and its show/hide button now only appear while you're playing a fort or an adventure. They no longer show up on the world map when choosing an embark site, in legends, or on other screens where they don't belong.
+
 ## 1.0 – First release
 
 **The menu**
@@ -17,7 +21,7 @@
 - Put favourite commands on a strip of buttons under the top information bar. It grows and shrinks to fit, wraps onto more rows when needed, and hides when empty.
 - Buttons are green while their command is switched on.
 - A small arrow button next to the DFHack logo shows or hides the toolbar.
-- Toolbars for fort mode, adventure mode, legends and the embark screen, each movable with `gui/overlay`.
+- Toolbars for fort mode and adventure mode, each movable with `gui/overlay`.
 
 **Launcher**
 - **Add to DFHack menu** (Ctrl-K) in the DFHack launcher adds the command you typed or just ran, with a popup to name it and put it on the toolbar.
